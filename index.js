@@ -47,7 +47,7 @@ var dashboard = new ParseDashboard({
 var app = express();
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+//app.use(express.urlencoded({ extended: true }));
 
 app.post('/getLink', async (req, res) => {
     // Validar parámetros
