@@ -51,7 +51,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.post('/getLink', async (req, res) => {
     // Validar parámetros
-
+    const error = { success: false, message: "Faltan parámetros" }
     if (!req.body) return res.json(error)
     // Desestructurar parámetros
     const { title, description, id, price, method, application } = req.body
