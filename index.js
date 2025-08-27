@@ -103,7 +103,7 @@ app.post(API_WEBHOOK || '/webhook', async (req, res) => {
 const init = async () => {
     await api.start();
     app.use('/parse', api.app);
-    app.use('/', dashboard);
+    app.use('/dashboard', dashboard);
     app.listen(PORT, () => {
         console.log('Servidor iniciado para http');
     });
