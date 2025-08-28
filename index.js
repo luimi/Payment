@@ -5,7 +5,7 @@ var dotenv = require('dotenv');
 var Wompi = require('./cloud/wompi');
 dotenv.config();
 
-const { PORT, PARSE_MONGODB_URI, PARSE_APPID, PARSE_MASTERKEY, PARSE_SERVER_URL, PARSE_USERNAME, PARSE_PASSWORD, WOMPI_PRVKEY, WOMPI_SNBKEY, API_WEBHOOK } = process.env
+const { PORT, PARSE_MONGODB_URI, PARSE_APPID, PARSE_MASTERKEY, PARSE_SERVER_URL, PARSE_USERNAME, PARSE_PASSWORD, WOMPI_PRVKEY, WOMPI_SNBKEY, WOMPI_WEBHOOK } = process.env
 
 var paymentMethods = {}
 
@@ -77,13 +77,32 @@ app.post('/getLink', async (req, res) => {
     res.json(result)
 })
 
-app.post(API_WEBHOOK || '/webhook', async (req, res) => {
+app.post(WOMPI_WEBHOOK || '/wompi', async (req, res) => {
     const error = { success: false, message: "Faltan parámetros" }
     if (!req.body) return res.json(error);
     const data = req.body;
-    //Identificar de donde estan llamando la petición
-    const id = data.data.transaction.payment_link_id
-    const link = await new Parse.Query("Link").equalTo("code", id).include("app").first({ useMasterKey: true });
+    let status = "";
+    switch (data.data.transaction.status) {
+        case "APPROVED":
+            status = "Approved";
+            break;
+        case "DECLINED":
+            status = "Declined";
+            break;
+        case "VOIDED":
+            status = "Voided";
+            break;
+        case "ERROR":
+            status = "Error";
+            break;
+    }
+    sendWebhook(data.data.transaction.payment_link_id, data, status);
+    
+    return res.json({ success: true });
+})
+
+const sendWebhook = async (code, transaction, status) => {
+    const link = await new Parse.Query("Link").equalTo("code", code).include("app").first({ useMasterKey: true });
     if (!link) return res.send({ success: false, message: "Link no encontrado" });
     const app = link.get("app");
     let headers = {
@@ -91,15 +110,14 @@ app.post(API_WEBHOOK || '/webhook', async (req, res) => {
         'X-Parse-Application-Id': app.get("appid"),
     };
     if(app.get("restkey")){
-        headers['X-Parse-REST-API-Key'] = app.get("restKey");
+        headers['X-Parse-REST-API-Key'] = app.get("restkey");
     }
     await fetch(`${link.get("app").get("url")}`, {
         method: 'POST',
         headers: headers,
-        body: JSON.stringify(data)
+        body: JSON.stringify({code, transaction, status})
     });
-    return res.json({ success: true });
-})
+}
 const init = async () => {
     await api.start();
     app.use('/parse', api.app);
