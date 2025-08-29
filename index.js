@@ -17,6 +17,11 @@ if (WOMPI_SNBKEY) {
     paymentMethods['wompiSandbox'] = new Wompi("https://sandbox.wompi.co/v1", WOMPI_SNBKEY)
 }
 
+
+
+var app = express();
+
+app.use(express.json());
 var api = new ParseServer({
     databaseURI: PARSE_MONGODB_URI,
     cloud: './cloud/main.js',
@@ -25,29 +30,26 @@ var api = new ParseServer({
     serverURL: PARSE_SERVER_URL
 });
 
-var options = { allowInsecureHTTP: false };
+if (PARSE_USERNAME && PARSE_PASSWORD) {
+    var dashboard = new ParseDashboard({
+        "apps": [
+            {
+                "serverURL": PARSE_SERVER_URL,
+                "appId": PARSE_APPID,
+                "masterKey": PARSE_MASTERKEY,
+                "appName": "Payment"
+            }
+        ],
+        "users": [
+            {
+                "user": PARSE_USERNAME,
+                "pass": PARSE_PASSWORD
+            },
+        ]
+    });
+    app.use('/', dashboard);
+}
 
-var dashboard = new ParseDashboard({
-    "apps": [
-        {
-            "serverURL": PARSE_SERVER_URL,
-            "appId": PARSE_APPID,
-            "masterKey": PARSE_MASTERKEY,
-            "appName": "Payment"
-        }
-    ],
-    "users": [
-        {
-            "user": PARSE_USERNAME,
-            "pass": PARSE_PASSWORD
-        },
-    ]
-});
-
-var app = express();
-
-app.use(express.json());
-//app.use(express.urlencoded({ extended: true }));
 
 app.post('/getLink', async (req, res) => {
     // Validar parámetros
@@ -97,7 +99,7 @@ app.post(WOMPI_WEBHOOK || '/wompi', async (req, res) => {
             break;
     }
     sendWebhook(data.data.transaction.payment_link_id, data, status);
-    
+
     return res.json({ success: true });
 })
 
@@ -109,19 +111,19 @@ const sendWebhook = async (code, transaction, status) => {
         'Content-Type': 'application/json',
         'X-Parse-Application-Id': app.get("appid"),
     };
-    if(app.get("restkey")){
+    if (app.get("restkey")) {
         headers['X-Parse-REST-API-Key'] = app.get("restkey");
     }
     await fetch(`${link.get("app").get("url")}`, {
         method: 'POST',
         headers: headers,
-        body: JSON.stringify({code, transaction, status})
+        body: JSON.stringify({ code, transaction, status })
     });
 }
 const init = async () => {
     await api.start();
     app.use('/parse', api.app);
-    app.use('/', dashboard);
+
     app.listen(PORT, () => {
         console.log('Servidor iniciado para http');
     });
