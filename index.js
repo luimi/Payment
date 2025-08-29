@@ -30,6 +30,7 @@ var api = new ParseServer({
 });
 
 if (PARSE_USERNAME && PARSE_PASSWORD) {
+    console.log("Iniciando con dashboard")
     var ParseDashboard = require('parse-dashboard');
     var dashboard = new ParseDashboard({
         "apps": [
