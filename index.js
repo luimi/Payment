@@ -4,7 +4,7 @@ var dotenv = require('dotenv');
 var Wompi = require('./cloud/wompi');
 dotenv.config();
 
-const { PORT, PARSE_MONGODB_URI, PARSE_APPID, PARSE_MASTERKEY, PARSE_SERVER_URL, PARSE_USERNAME, PARSE_PASSWORD, WOMPI_PRVKEY, WOMPI_SNBKEY, WOMPI_WEBHOOK } = process.env
+const { PORT, PARSE_MONGODB_URI, PARSE_APPID, PARSE_MASTERKEY, PARSE_SERVER_URL, WOMPI_PRVKEY, WOMPI_SNBKEY, WOMPI_WEBHOOK } = process.env
 
 var paymentMethods = {}
 
@@ -26,29 +26,6 @@ var api = new ParseServer({
     masterKey: PARSE_MASTERKEY,
     serverURL: PARSE_SERVER_URL
 });
-
-if (PARSE_USERNAME && PARSE_PASSWORD) {
-    console.log("Iniciando con dashboard")
-    var ParseDashboard = require('parse-dashboard');
-    var dashboard = new ParseDashboard({
-        "apps": [
-            {
-                "serverURL": PARSE_SERVER_URL,
-                "appId": PARSE_APPID,
-                "masterKey": PARSE_MASTERKEY,
-                "appName": "Payment"
-            }
-        ],
-        "users": [
-            {
-                "user": PARSE_USERNAME,
-                "pass": PARSE_PASSWORD
-            },
-        ]
-    });
-    app.use('/dashboard', dashboard);
-}
-
 
 app.post('/getLink', async (req, res) => {
     // Validar parámetros
