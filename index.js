@@ -1,6 +1,5 @@
 var express = require('express');
 var ParseServer = require('parse-server').ParseServer;
-var ParseDashboard = require('parse-dashboard');
 var dotenv = require('dotenv');
 var Wompi = require('./cloud/wompi');
 dotenv.config();
@@ -31,6 +30,7 @@ var api = new ParseServer({
 });
 
 if (PARSE_USERNAME && PARSE_PASSWORD) {
+    var ParseDashboard = require('parse-dashboard');
     var dashboard = new ParseDashboard({
         "apps": [
             {
