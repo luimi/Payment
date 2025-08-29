@@ -16,8 +16,6 @@ if (WOMPI_SNBKEY) {
     paymentMethods['wompiSandbox'] = new Wompi("https://sandbox.wompi.co/v1", WOMPI_SNBKEY)
 }
 
-
-
 var app = express();
 
 app.use(express.json());
@@ -48,7 +46,7 @@ if (PARSE_USERNAME && PARSE_PASSWORD) {
             },
         ]
     });
-    app.use('/', dashboard);
+    app.use('/dashboard', dashboard);
 }
 
 
