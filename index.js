@@ -4,7 +4,7 @@ var dotenv = require('dotenv');
 var Wompi = require('./cloud/wompi');
 dotenv.config();
 
-const { PORT, PARSE_MONGODB_URI, PARSE_APPID, PARSE_MASTERKEY, PARSE_SERVER_URL, WOMPI_PRVKEY, WOMPI_SNBKEY, WOMPI_WEBHOOK } = process.env
+const { PORT, PARSE_MONGODB_URI, PARSE_APPID, PARSE_MASTERKEY, PARSE_SERVER_URL, PARSE_MASTERKEY_IP, WOMPI_PRVKEY, WOMPI_SNBKEY, WOMPI_WEBHOOK } = process.env
 
 var paymentMethods = {}
 
@@ -24,7 +24,8 @@ var api = new ParseServer({
     cloud: './cloud/main.js',
     appId: PARSE_APPID,
     masterKey: PARSE_MASTERKEY,
-    serverURL: PARSE_SERVER_URL
+    serverURL: PARSE_SERVER_URL,
+    masterKeyIps: [`${PARSE_MASTERKEY_IP}` || '0.0.0.0/0']
 });
 
 app.post('/getLink', async (req, res) => {
