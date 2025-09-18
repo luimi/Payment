@@ -25,7 +25,7 @@ var api = new ParseServer({
     appId: PARSE_APPID,
     masterKey: PARSE_MASTERKEY,
     serverURL: PARSE_SERVER_URL,
-    masterKeyIps: [`${PARSE_MASTERKEY_IP}` || '0.0.0.0/0']
+    masterKeyIps: [PARSE_MASTERKEY_IP ? `${PARSE_MASTERKEY_IP}` : '0.0.0.0/0']
 });
 
 app.post('/getLink', async (req, res) => {
